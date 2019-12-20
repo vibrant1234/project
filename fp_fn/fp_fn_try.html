@@ -1,0 +1,358 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+    "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+      <script type="text/javascript"
+      src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCc5_z2Zruh01mevWGVavrIZ6D5N5Q_lqc&sensor=false&libraries=geometry">
+    </script>
+    </head>
+
+<body onload="initialize()">
+<input type="file" id="/home/rrocks/Desktop/machine_learning/gps and wifi data/retest_mail/Bus_GPS_2017_08_03_18_46_55_314.txt" onchange="upload()"/>
+
+<br><div style="color: #555555" id="uploading"></div>
+<div style="position:absolute">
+<input type="radio" name="type" onclick="setfpfn(this.value)" value="stops" > <font color="blue">Bus Stops</input>
+<input type="radio" name="type" onclick="setfpfn(this.value)" value="fn" > <font color="red">False -ve</input>
+<input type="radio" name="type" onclick="setfpfn(this.value)" value="fp"> <font color="green">False +ve        </input>
+  Interval  :
+  <input type="number" name='b' id='b' value='1'>
+  <button onclick ="add(document.getElementById('b').value)">SET</button><br> <p>
+  NUMBER <br><br>
+<input type="radio" name ="check" onclick="setcheck(true)"  value=true> <font color ="green"> TRUE </input> <br>
+<input type="radio" name ="check" onclick="setcheck(false)"  value=false> <font color ="green"> FALSE </input> <br>
+ <br>
+COLOR
+<br>
+<br>
+<input type="radio" name="trailType" onclick="setColor(this.value)" value="dbscan" > <font color="brown">DBSCAN</input><br>
+<input type="radio" name="trailType" onclick="setColor(this.value)" value="optics"> <font color="green">OPTICS</input><br>
+<input type="radio" name="trailType" onclick="setColor(this.value)" value="psnn"> <font color="blue">PSNN</input><br>
+<input type="radio" name="trailType" onclick="setColor(this.value)" value="cbsmot"> <font color="black">CBSMOT</input><br>
+<input type="radio" name="trailType" onclick="setColor(this.value)" value="prop"> <font color="yellow">Prop</input><br>
+<input type="radio" name="trailType" onclick="setColor(this.value)" value="actual" > <font color="red">Actual</input><br>
+<input type="radio" name="trailType" onclick="setColor(this.value)" value="light_red" > <font color="red">Light Red</input><br>
+<input type="radio" name="trailType" onclick="setColor(this.value)" value="yellow" > <font color="yellow">Yellow</input><br>
+<input type="radio" name="trailType" onclick="setColor(this.value)" value="light_yellow" > <font color="yellow">Light Yellow</input><br>
+<input type="radio" name="trailType" onclick="setColor(this.value)" value="green" > <font color="green">Green</input><br>
+<input type="radio" name="trailType" onclick="setColor(this.value)" value="light_green" > <font color="green">Light Green</input><br>
+<input type="radio" name="trailType" onclick="setColor(this.value)" value="blue" > <font color="blue">Blue</input><br>
+<input type="radio" name="trailType" onclick="setColor(this.value)" value="light_blue" > <font color="blue">Light Blue</input><br>
+<input type="radio" name="trailType" onclick="setColor(this.value)" value="black" > <font color="black">Black</input><br>
+<br>TRAIL TYPES<br>
+
+<input type="radio" name="type" onclick="setfpfn(this.value)" value="circle" > <img src="symbol_circle.png" height="42" width="42"></input><br>
+<input type="radio" name="type" onclick="setfpfn(this.value)" value="BACKWARD_CLOSED_ARROW" >  <img src="symbol_back_close.png" height="42" width="42"></input><br>
+<input type="radio" name="type" onclick="setfpfn(this.value)" value="BACKWARD_OPEN_ARROW" >  <img src="symbol_back_open.png" height="42" width="42"></input><br>
+<input type="radio" name="type" onclick="setfpfn(this.value)" value="FORWARD_OPEN_ARROW" >  <img src="symbol_fore_open.png" height="42" width="42"></input><br>
+</div>
+<br>
+<div id="map_canvas" style="width: 90%; height:680px; float:right; border: 1px solid #dddddd;"></div>
+<script type="text/javascript">
+
+
+var map;
+var Wait;
+var color="blue";
+var symbol="CIRCLE"
+back_hex="e58141"
+angle="10"
+text="Stp"
+fnfp_flag=0
+var Inter=1;
+function add(any)
+{
+	Inter=parseInt(any);
+	alert(Inter+1);
+}
+var number=false;
+function setcheck(type)
+{
+	number=type;
+}
+function setfpfn(type)
+{
+
+	switch(type)
+	{
+	    case 'stops':
+	            fnfp_flag=-1;
+	            break;
+	            
+		case 'fn':
+				//alert(trailType);
+				
+				fnfp_flag=0;// for false +ve
+				
+				break;
+		case 'fp':
+				//alert(trailType);
+				fnfp_flag=1; // For false -ve
+				
+				break;
+		case 'circle':
+				fnfp_flag=2; // For Circle
+				break;
+		case 'BACKWARD_CLOSED_ARROW':
+				fnfp_flag=3;  // For backward closed arrow
+				break;
+		case 'BACKWARD_OPEN_ARROW':
+				fnfp_flag=4; // for // backward open arrow
+				break;
+		case 'FORWARD_OPEN_ARROW':
+				fnfp_flag=5; // for forward open arrow
+				break;
+		
+		default:
+				
+
+	}
+//alert(fnfp_flag)
+}
+
+function setColor(trailType)
+{
+
+	switch(trailType)
+	{
+		case 'dbscan':
+				//alert(trailType);
+				color="brown";
+				angle="60";
+				back_hex="e58141";
+				break;
+		case 'optics':
+				//alert(trailType);
+				color="green";
+				angle="30";
+				back_hex="09ad7e";
+				break;
+		case 'psnn':
+				//alert(trailType);
+				color="blue";
+				angle="0";
+				back_hex="156cff";
+				break;
+		case 'cbsmot':
+				//alert(trailType);
+				color="black";
+				angle="330";
+				back_hex="cddcd5";
+				break;
+		case 'prop':
+				//alert(trailType);
+				color="yellow";
+				angle="300";
+				back_hex="ffd164";
+				break;
+		case 'actual':
+				//alert(trailType);
+				color="red";
+				angle="350";
+				back_hex="ff0000";
+				break;
+
+		case 'light_red':
+				//alert(trailType);
+				color="tomato";
+				angle="350";
+				back_hex="FF6347";
+				break;
+		
+
+		case 'yellow':
+				//alert(trailType);
+				color="yellow";
+				angle="350";
+				back_hex="FFFF00";
+				break;
+
+
+		case 'light_yellow':
+				//alert(trailType);
+				color="lightgoldenrodyellow";
+				angle="350";
+				back_hex="FAFAD2";
+				break;
+
+
+
+		case 'green':
+				//alert(trailType);
+				color="green";
+				angle="350";
+				back_hex="008000";
+				break;
+
+
+		case 'light_green':
+				//alert(trailType);
+				color="lawngreen";
+				angle="350";
+				back_hex="7CFC00";
+				break;
+
+
+		case 'blue':
+				//alert(trailType);
+				color="darkblue";
+				angle="350";
+				back_hex="00008B";
+				break;
+
+
+		case 'light_blue':
+				//alert(trailType);
+				color="lightskyblue";
+				angle="350";
+				back_hex="87CEFA";
+				break;
+		case 'black':
+				color="black";
+				angle="350";
+				back_hex="#000000";
+				break;
+		default:
+				
+
+	}
+
+}
+function upload() {
+      document.getElementById("uploading").innerHTML="uploading....";
+      var myfile=document.getElementById("/home/rrocks/Desktop/machine_learning/gps and wifi data/retest_mail/Bus_GPS_2017_08_03_18_46_55_314.txt").files[0];
+      //alert(myfile.size);
+      var r = new FileReader();
+      
+      r.onload = function(e) { 
+	    var contents = e.target.result;
+	    
+	    parseContents(contents);
+	    //document.getElementById("cont").innerHTML=fileContent;
+	    
+	    document.getElementById("uploading").innerHTML="File uploaded: "+myfile.name;
+      }
+   
+      r.readAsText(myfile);
+}
+
+
+function parseContents(contents)
+{
+		
+	var totalContent=contents.split("\n");
+	var lat=new Array();
+	var long=new Array();
+	var speed=new Array();
+	var bearing=new Array();
+	var timestamp=new Array();
+	var stopNo=new Array();
+	var Bearing=new Array();
+	var Theta=new Array();
+	var LatLong=new Array();
+	var sign=1;
+	var polyOptions = {
+	    strokeColor: 'green',
+	    strokeOpacity: 1.0,
+	    strokeWeight: 3
+	  }
+	var g=-1;
+	var m=0;
+	var c=0;
+	var slat,slong;
+	var f_size=totalContent.length
+	//alert(totalContent.length)
+	j=0
+	console.log(Inter);
+	for(var i=0;i<totalContent.length;)
+	{
+	   
+			var latlong=totalContent[i].trim().split(",");
+			
+			if(!isNaN(latlong[0]) && latlong.length>1)
+			{
+        	    //alert(latlong)
+			    
+			    lat[j]=parseFloat(latlong[0]);
+			    long[j]=parseFloat(latlong[1]);
+			    timestamp[j]=latlong[3];
+			  //  stopNo[j]=parseInt(latlong[6]);
+			    
+			    plotCluster(lat[j],long[j],timestamp[j],j);				
+			    j++;
+		    
+		     }
+		     i=i+Inter;
+		
+	}
+	//alert("Long: "+long+ " length: "+long.length);
+	
+}
+
+function plotCluster(lat,long,timestamp,stopNo)
+{
+
+	var latlong = new google.maps.LatLng(lat,long);
+	map.setCenter(latlong);
+	if(number==false)
+		stopNo="";
+	//var contents="Lat: "+ lat+ "Long: "+long+" Speed:"+speed+" Theta: "+Theta+" C Bearing:"+ Bearing;
+	var contents="<b>Stop: #"+stopNo+"</b><p>Lat:"+lat+"&nbsp;Long:"+long+"&nbsp;time:"+timestamp
+	var infowindow = new google.maps.InfoWindow({content: contents});
+	switch(fnfp_flag)
+	{	case 0:
+      var marker = new google.maps.Marker({position:latlong,draggable:false,icon:{url:"http://chart.apis.google.com/chart?chst=d_map_spin&chld=.8|"+angle+"|"+back_hex+"|20|b|"+stopNo},map:map});
+    	break;
+    	case 2:   	
+	var marker = new google.maps.Marker({position:latlong,draggable:false,label:""+stopNo,icon:{ path: google.maps.SymbolPath.CIRCLE, fillColor: "#FFFFFF",fillOpacity:                         			       0,scale:15,strokeColor:color,strokeWeight: 1.5},map:map});
+	break;
+	
+	case 3:
+		var marker = new google.maps.Marker({position:latlong,draggable:false,label:""+stopNo+"",icon:{ path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,strokeColor:color,scale: 6,strokeWeight: 1.5},map:map});
+		break;
+	case 4:
+		var marker = new google.maps.Marker({position:latlong,draggable:false,label:""+stopNo,icon:{ path: google.maps.SymbolPath.BACKWARD_OPEN_ARROW,strokeColor:color,scale: 6,strokeWeight: 1.5},map:map});
+		break;
+	case 5:
+		var marker = new google.maps.Marker({position:latlong,draggable:false,label:""+stopNo,icon:{ path: google.maps.SymbolPath.FORWARD_OPEN_ARROW,strokeColor:color,scale: 6,strokeWeight: 1.5},map:map});
+		break;
+		
+	
+	default:
+	
+	var marker = new google.maps.Marker({position:latlong,draggable:false,label:""+stopNo,icon:{ path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW, fillColor:"#000000"+back_hex,  fillOpacity:1.8 ,scale:5.5,strokeColor:color,strokeWeight: 3},map:map});
+	}
+
+	google.maps.event.addListener(marker, 'click', function() {
+    infowindow.open(map,marker);
+	
+	})
+	// trails symbols(icons) are on this website:- https://developers.google.com/maps/documentation/javascript/symbols
+
+}
+
+
+
+function initialize() {
+	
+        geocoder = new google.maps.Geocoder();
+ 
+ 
+        var myOptions = {
+          center: new google.maps.LatLng(22.546,88.354),
+          zoom: 15,
+		  scaleControl: true,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        map = new google.maps.Map(document.getElementById("map_canvas"),
+            myOptions);
+
+}
+
+
+
+</script>
+</body>
+</html>
